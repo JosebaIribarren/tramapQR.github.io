@@ -15,6 +15,7 @@ h1{font-size:1.9rem;line-height:1.15;margin:.5rem 0 .25rem}
 label{display:block;margin:0 0 1rem;font-weight:bold}
 input[type=text],input[type=password]{display:block;width:100%;margin-top:.3rem;padding:.7rem .8rem;font:inherit;font-weight:normal;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:6px}
 input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+label small{display:block;margin-top:.3rem;font-weight:normal;font-size:.9rem;color:var(--mut)}
 .chk{display:flex;gap:.6rem;align-items:center;font-weight:normal;margin:0 0 .6rem}
 .chk input{width:1.15rem;height:1.15rem;accent-color:var(--acc)}
 .btn{display:block;width:100%;padding:.85rem 1rem;font:inherit;font-weight:bold;text-align:center;text-decoration:none;color:var(--accink);background:var(--acc);border:0;border-radius:6px;cursor:pointer}
@@ -44,6 +45,10 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(-
   <label class="chk"><input type="checkbox" id="hidden"> Mi red es oculta</label>
   <label>Token del bot
     <input type="text" id="tok" required autocapitalize="off" spellcheck="false" placeholder="123456789:AA...">
+  </label>
+  <label>ID de tu chat de Telegram
+    <input type="text" id="chat" required inputmode="numeric" autocapitalize="off" spellcheck="false" placeholder="123456789">
+    <small>Es un número. Escríbele a @userinfobot en Telegram y te lo responde.</small>
   </label>
   <button class="btn" type="submit">Generar QR</button>
   <p id="msg" role="status" aria-live="polite"></p>
@@ -2383,6 +2388,8 @@ var qrcode = function() {
     e.preventDefault();
     var tok = $('tok').value.trim();
     if(!/^\d{6,12}:[A-Za-z0-9_-]{30,}$/.test(tok)){ say('El token no tiene el formato correcto. Cópialo de nuevo desde BotFather.', true); return; }
+    var chat = $('chat').value.trim();
+    if(!/^-?\d{5,15}$/.test(chat)){ say('El ID de chat debe ser un número, por ejemplo 123456789.', true); return; }
 
     say('Verificando el token...');
     var user;
@@ -2394,7 +2401,7 @@ var qrcode = function() {
     }catch(err){ say('No se pudo contactar a Telegram. Revisa tu conexión a internet.', true); return; }
 
     var code = newCode();
-    var payload = JSON.stringify({v:1, ssid:$('ssid').value, pw:$('pw').value, hid:$('hidden').checked, tok:tok, code:code});
+    var payload = JSON.stringify({v:1, ssid:$('ssid').value, pw:$('pw').value, hid:$('hidden').checked, tok:tok, chat:chat, code:code});
     try{
       var qr = qrcode(0, 'M'); qr.addData(payload, 'Byte'); qr.make();
       $('qr').innerHTML = qr.createSvgTag(6, 0);
